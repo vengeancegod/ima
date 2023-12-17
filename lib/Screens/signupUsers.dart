@@ -19,7 +19,7 @@ class signupUsers extends StatelessWidget {
     String name = nameController.text;
     String email = emailController.text;
     String password = passwordController.text;
-    String phoneNumber = numberPhoneController.text;
+    String numberPhone = numberPhoneController.text;
 
     final url = Uri.parse('http://localhost:8092/users/signup');
     final headers = {'Content-Type': 'application/json'};
@@ -27,7 +27,7 @@ class signupUsers extends StatelessWidget {
       'name': name,
       'email':email,
       'password':password,
-      'phoneNumber':phoneNumber
+      'numberPhone':numberPhone
     });
 
     final response = await http.post(url, headers: headers, body:body);
@@ -147,7 +147,7 @@ class signupUsers extends StatelessWidget {
               )),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.blue,
                   onPrimary: Colors.white,
                 ),
                 onPressed: () {

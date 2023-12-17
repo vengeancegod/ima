@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:clientflutter/Models/User.dart';
 import 'package:clientflutter/Screens/signupUsers.dart';
 import 'package:clientflutter/Screens/adminPage.dart';
 import 'package:clientflutter/Models/LoginModel.dart';
@@ -68,8 +69,9 @@ class signinUsers extends StatelessWidget {
                             )),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: Colors.blue,
                             onPrimary: Colors.white,
+
                           ),
                           onPressed: () {
                             signin(context);
@@ -96,10 +98,10 @@ class signinUsers extends StatelessWidget {
     final response = await http.post(url, headers: headers, body:body);
     if (response.statusCode == 200)
     {
-      LoginModel loginModel = LoginModel.fromJson(json.decode(response.body));
+      User user = User.fromJson(json.decode(response.body));
 
-      List roles = loginModel.roles;
-      int userId = loginModel.id;
+      List roles = user.roles;
+      int userId = user.id;
 
       Future<void> saveUserId(int userId) async {
         final prefs = await SharedPreferences.getInstance();
@@ -109,30 +111,30 @@ class signinUsers extends StatelessWidget {
 
       for (String role in roles)
       {
-        if (role == 'ROLE_USER')
-        {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response.body),
-            ),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => clientPage()),
-          );
-        }
-        if (role == 'ROLE_AGENT') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response.body),
-            ),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => agentPage()),
-          );
-        }
-        if (role == 'ROLE_ADMIN') {
+        // if (role == 'ROLE_USER')
+        // {
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(
+        //       content: Text(response.body),
+        //     ),
+        //   );
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => clientPage()),
+        //   );
+        // }
+        // if (role == 'ROLE_AGENT') {
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(
+        //       content: Text(response.body),
+        //     ),
+        //   );
+        //   Navigator.pushReplacement(
+        //     context,
+        //     MaterialPageRoute(builder: (context) => agentPage()),
+        //   );
+        // }
+        if (role == 'ROLE_ADMINISTRATOR') {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Вы успешно авторизировались!"),
@@ -219,7 +221,6 @@ class signinUsers extends StatelessWidget {
               ),
             );
           }
-
         }
       }
     }

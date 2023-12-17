@@ -3,33 +3,34 @@ import 'package:clientflutter/Models/User.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'lk.dart';
 
-class AdminPageSceen extends StatelessWidget
+class AdminPage extends StatelessWidget
 {
   @override
   Widget build(BuildContext context)
   {
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
+        primarySwatch: Colors.blue,
       ),
-      home: AdminPageScreen(),
+      home: adminPage(),
     );
   }
 }
-class AdminPageScreen extends StatefulWidget
+class adminPage extends StatefulWidget
 {
   @override
-  AdminPageScreenScreenState createState() => AdminPageScreenScreenState();
+  adminPageState createState() => adminPageState();
 }
 
-class AdminPageScreenScreenState extends State<AdminPageScreen>
+class adminPageState extends State<adminPage>
 {
 
   List<User> dataList = [];
 
   Future<void> listUsers() async {
-    final response = await http.get(Uri.parse('http://localhost:8092/api_users/users'));
+    final response = await http.get(Uri.parse('http://localhost:8092/users/get'));
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       setState(() {
@@ -37,20 +38,8 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
       });
     }
   }
-  Future<void> blockUser(int id, BuildContext context) async {
-    final response = await http.put(Uri.parse('http://172.20.10.3:8092/api_users/block/$id'));
-    if (response.statusCode == 200)
-    {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(response.body),
-        ),
-      );
-      listUsers();
-    }
-  }
-  Future<void> inBlockUser(int id, BuildContext context) async {
-    final response = await http.put(Uri.parse('http://localhost:8092/api_users/inBlock/$id'));
+  Future<void> delete(int id, BuildContext context) async {
+    final response = await http.delete(Uri.parse('http://localhost:8092/users/delete/$id'));
     if (response.statusCode == 200)
     {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,13 +51,12 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
     }
   }
   Future<void> changeRole(int id, String? role) async {
-    final response = await http.put(Uri.parse('http://172.20.10.3:8092/api_users/changeRole/$id/$role'));
+    final response = await http.put(Uri.parse('http://localhost:8092/users/changeRole/$id/$role'));
     if (response.statusCode == 200)
     {
-      String message = "Роль назначена!";
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(message),
+          content: Text(response.body),
         ),
       );
       listUsers();
@@ -88,8 +76,8 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.deepPurple,
-          title: Text('Список пользователей', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.blue,
+          title: Text('Список пользователей: ', style: TextStyle(color: Colors.white)),
           actions: [
             IconButton(
               icon: Icon(Icons.account_circle),
@@ -115,7 +103,7 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
                     Row(
                       children: [
                         Text(
-                          'Имя:',
+                          'Имя: ',
                           style: TextStyle(
                             color: Colors.black,
                           ),
@@ -131,7 +119,7 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
                     Row(
                       children: [
                         Text(
-                          'Email:',
+                          'Email: ',
                           style: TextStyle(
                             color: Colors.black,
                           ),
@@ -147,23 +135,7 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
                     Row(
                         children: [
                           Text(
-                            'Статус:',
-                            style: TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            (data.active.toString()),
-                            style: TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                        ]
-                    ),
-                    Row(
-                        children: [
-                          Text(
-                            'Роль:',
+                            'Роль: ',
                             style: TextStyle(
                               color: Colors.black,
                             ),
@@ -179,29 +151,18 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
                     SizedBox(height: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: Colors.blue,
                         onPrimary: Colors.white,
                       ),
-                      child: Text('Заблокировать'),
+                      child: Text('Удалить'),
                       onPressed: () {
-                        blockUser(data.id,context);
+                        delete(data.id,context);
                       },
                     ),
                     SizedBox(height: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        onPrimary: Colors.white,
-                      ),
-                      child: Text('Разблокировать'),
-                      onPressed: () {
-                        inBlockUser(data.id,context);
-                      },
-                    ),
-                    SizedBox(height: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: Colors.blue,
                         onPrimary: Colors.white,
                       ),
                       onPressed: () {
@@ -211,7 +172,7 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
                             return StatefulBuilder(
                               builder: (BuildContext context, StateSetter setState) {
                                 return AlertDialog(
-                                  title: Text('Выберите роль'),
+                                  title: Text('Роли'),
                                   content: DropdownButton<String>(
                                     value: selectedRole,
                                     onChanged: (String? newValue) {
@@ -219,7 +180,7 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
                                         selectedRole = newValue;
                                       });
                                     },
-                                    items: <String>['ROLE_USER', 'ROLE_MODER', 'ROLE_ADMIN']
+                                    items: <String>['ROLE_CLIENT', 'ROLE_AGENT', 'ROLE_ADMINISTRATOR']
                                         .map<DropdownMenuItem<String>>((String value) {
                                       return DropdownMenuItem<String>(
                                         value: value,
@@ -234,7 +195,7 @@ class AdminPageScreenScreenState extends State<AdminPageScreen>
                                         changeRole(data.id, selectedRole);
                                         Navigator.of(context).pop();
                                       },
-                                      child: Text('OK'),
+                                      child: Text('Oк'),
                                     ),
                                   ],
                                 );

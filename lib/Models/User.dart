@@ -8,11 +8,11 @@ class User {
   String name;
   String email;
   String password;
-  int numberPhone;
-  bool active;
+  String numberPhone;
+
   List roles;
 
-  User({required this.name, required this.id, required this.email, required this.password, required this.numberPhone, required this.active, required this.roles});
+  User({required this.name, required this.id, required this.email, required this.password, required this.numberPhone,  required this.roles});
   factory User.fromJson(Map<String, dynamic> json) => User(
 
       id: json["id"],
@@ -20,7 +20,7 @@ class User {
     email: json["email"],
       password: json["password"],
       numberPhone: json["numberPhone"],
-    active: json["active"],
+
     roles: json["roles"]
   );
 
@@ -30,7 +30,6 @@ class User {
     "email": password,
     'id':id,
     "numberPhone": numberPhone,
-    "active": active,
     "roles": roles
   };
 }
