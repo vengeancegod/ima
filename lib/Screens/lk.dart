@@ -36,7 +36,7 @@ class _lk extends State<lk> {
   {
     int? userId = await getUserId();
     final response = await http.get(
-        Uri.parse('http://localhost:8092/users/user/$userId'));
+        Uri.parse('http://192.168.43.59:8092/users/user/$userId'));
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(utf8.decode(response.bodyBytes));
       setState(() {
@@ -89,7 +89,7 @@ class _lk extends State<lk> {
             ),
             SizedBox(height: 8),
             Text(
-                'Роль: ${user != null ? (user!.roles.contains("ROLE_CLIENT") ? "Клиент" : (user!.roles.contains("ROLE_AGENT") ? "Страховой агент" : "Администратор")) : ""}',
+                'Роль: ${user != null ? (user!.roles.contains("ROLE_USER") ? "Клиент" : user!.roles.contains("ROLE_CLIENT") ? "Клиент": (user!.roles.contains("ROLE_AGENT") ? "Страховой агент" : "Администратор")) : ""}',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 16),

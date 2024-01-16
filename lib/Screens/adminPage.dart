@@ -30,7 +30,7 @@ class adminPageState extends State<adminPage>
   List<User> dataList = [];
 
   Future<void> listUsers() async {
-    final response = await http.get(Uri.parse('http://localhost:8092/users/get'));
+    final response = await http.get(Uri.parse('http://192.168.43.59:8092/users/get'));
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       setState(() {
@@ -39,7 +39,7 @@ class adminPageState extends State<adminPage>
     }
   }
   Future<void> delete(int id, BuildContext context) async {
-    final response = await http.delete(Uri.parse('http://localhost:8092/users/delete/$id'));
+    final response = await http.delete(Uri.parse('http://192.168.43.59:8092/users/delete/$id'));
     if (response.statusCode == 200)
     {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -51,7 +51,7 @@ class adminPageState extends State<adminPage>
     }
   }
   Future<void> changeRole(int id, String? role) async {
-    final response = await http.put(Uri.parse('http://localhost:8092/users/changeRole/$id/$role'));
+    final response = await http.put(Uri.parse('http://192.168.43.59:8092/users/changeRole/$id/$role'));
     if (response.statusCode == 200)
     {
       ScaffoldMessenger.of(context).showSnackBar(

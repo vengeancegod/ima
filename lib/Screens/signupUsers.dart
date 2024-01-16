@@ -21,13 +21,13 @@ class signupUsers extends StatelessWidget {
     String password = passwordController.text;
     String numberPhone = numberPhoneController.text;
 
-    final url = Uri.parse('http://localhost:8092/users/signup');
+    final url = Uri.parse('http://192.168.43.59:8092/users/signup');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       'name': name,
       'email':email,
       'password':password,
-      'numberPhone':numberPhone
+      'numberPhone':numberPhone,
     });
 
     final response = await http.post(url, headers: headers, body:body);

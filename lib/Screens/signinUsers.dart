@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:clientflutter/Models/User.dart';
 import 'package:clientflutter/Screens/signupUsers.dart';
 import 'package:clientflutter/Screens/adminPage.dart';
-import 'package:clientflutter/Models/LoginModel.dart';
 import 'package:clientflutter/Screens/clientPage.dart';
 import 'package:clientflutter/Screens/agentPage.dart';
 import 'package:http/http.dart' as http;
@@ -88,7 +87,7 @@ class signinUsers extends StatelessWidget {
   Future<void> signin(BuildContext context) async {
     String email = emailController.text;
     String password = passwordController.text;
-    final url = Uri.parse('http://localhost:8092/users/signin');
+    final url = Uri.parse('http://192.168.43.59:8092/users/signin');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       'email':email,
@@ -111,29 +110,29 @@ class signinUsers extends StatelessWidget {
 
       for (String role in roles)
       {
-        // if (role == 'ROLE_USER')
-        // {
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(
-        //       content: Text(response.body),
-        //     ),
-        //   );
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => clientPage()),
-        //   );
-        // }
-        // if (role == 'ROLE_AGENT') {
-        //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(
-        //       content: Text(response.body),
-        //     ),
-        //   );
-        //   Navigator.pushReplacement(
-        //     context,
-        //     MaterialPageRoute(builder: (context) => agentPage()),
-        //   );
-        // }
+         if (role == 'ROLE_USER' || role == 'ROLE_CLIENT')
+         {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(
+               content: Text(response.body),
+             ),
+           );
+           Navigator.pushReplacement(
+            context,
+             MaterialPageRoute(builder: (context) => clientPage()),
+           );
+         }
+        if (role == 'ROLE_AGENT') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.body),
+            ),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => agentPage()),
+          );
+        }
         if (role == 'ROLE_ADMINISTRATOR') {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -178,7 +177,7 @@ class signinUsers extends StatelessWidget {
             builder: (context) =>
                 AlertDialog(
                   title: Text('Ошибка!'),
-                  content: Text('Ваш аккаунт заблокирован ! Пожалуйста, создайте новый аккаунт.'),
+                  content: Text('Аккаунта не существует!'),
                   actions: [
                     TextButton(
                       onPressed: () {
