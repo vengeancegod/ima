@@ -1,70 +1,34 @@
+import 'dart:ffi';
 
-
-import 'package:clientflutter/Screens/contractPage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:clientflutter/Models/ApplicationModel.dart';
+import 'package:clientflutter/Models/User.dart';
+import 'package:clientflutter/Screens/lk.dart';
 import 'package:clientflutter/Screens/clientPage.dart';
-import 'package:clientflutter/Screens/agentPage.dart';
 
 
-import '../Models/User.dart';
-import 'agentPage.dart';
-
-
-class applicationPage extends StatefulWidget {
+class myApplication extends StatefulWidget {
   @override
-  applicationPageState createState() => applicationPageState();
-}
-class contractButton extends StatefulWidget {
-  final int applicationId;
-  final Function(int, BuildContext) addContract;
-
-  contractButton({required this.applicationId, required this.addContract});
-
-  @override
-  _contractButtonState createState() => _contractButtonState();
+  myApplicationState createState() => myApplicationState();
 }
 
-class _contractButtonState extends State<contractButton> {
-  bool isContracted = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      icon: Icon(
-        isContracted ? Icons.done_all : Icons.done_all_outlined,
-        color: isContracted ? Colors.green: Colors.grey,
-      ),
-      label: Text('Оформить договор'),
-      onPressed: () {
-        setState(() {
-          isContracted = true;
-        });
-
-        widget.addContract(widget.applicationId, context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => contractPage(applicationId: widget.applicationId)),
-        );
-      },
-    );
-  }
-}
-class applicationPageState extends State<applicationPage> {
-  final url = Uri.parse('http://192.168.43.59:8092/applications/app');
-  final headers = {'Content-Type': 'application/json'};
-  List<ApplicationModel> dataList = [];
+class myApplicationState extends State<myApplication> {
+  myApplication? application;
   User? user;
 
   Future<int?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('userId');
   }
-  Future<void> addApplication() async {
-    final response = await http.get(Uri.parse('http://192.168.43.59:8092/applications/appok'));
+  final headers = {'Content-Type': 'application/json'};
+  List<ApplicationModel> dataList = [];
+
+  Future<void> myApp() async {
+    int? userId = await getUserId();
+    final response = await http.get(Uri.parse('http://192.168.43.59:8092/applications/myApplications/$userId'));
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       setState(() {
@@ -73,40 +37,33 @@ class applicationPageState extends State<applicationPage> {
     }
   }
 
-  Future<void> allApplication() async {
-    final response = await http.get(Uri.parse('http://192.168.43.59:8092/applications/app'));
+  Future<void> deleteApplication(int? applicationId, BuildContext context) async {
+    final response = await http.delete(Uri.parse('http://192.168.43.59:8092/applications/delete/$applicationId'));
     if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      setState(() {
-        dataList = List<ApplicationModel>.from(jsonData.map((data) => ApplicationModel.fromJson(data)));
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.body),
+        ),
+      );
     }
-
-  }
-  Future<void> addContract(int? applicationId, BuildContext context) async {
+    myApp();
   }
   @override
   void initState() {
     super.initState();
-
-    allApplication();
-  }
-  _blockButton() async{
-    int? user = 0;
-    user = await getUserId();
-    return user;
+    myApp();
   }
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blue,
-          title: Text('Список заявок', style: TextStyle(color: Colors.white)),
+          title: Text('Мои заявки', style: TextStyle(color: Colors.white)),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => agentPage()),);
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => clientPage()),);
             },
           ),
         ),
@@ -138,7 +95,7 @@ class applicationPageState extends State<applicationPage> {
                           ),
                         ]
                     ),
-                    SizedBox(height: 5),
+                    SizedBox(height: 8),
                     Row(
                         children: [
                           Text(
@@ -147,6 +104,7 @@ class applicationPageState extends State<applicationPage> {
                               color: Colors.black,
                             ),
                           ),
+                          SizedBox(height: 8),
                           Text(
                             utf8.decode(data.numberSeriesPassport.toString().codeUnits),
                             style: TextStyle(
@@ -155,7 +113,7 @@ class applicationPageState extends State<applicationPage> {
                           ),
                         ]
                     ),
-                    SizedBox(height: 5),
+                    SizedBox(height: 8),
                     Row(
                         children: [
                           Text(
@@ -176,7 +134,7 @@ class applicationPageState extends State<applicationPage> {
                     Row(
                         children: [
                           Text(
-                            'Страховая сумма: ',
+                            'Страховая сумма::',
                             style: TextStyle(
                               color: Colors.black,
                             ),
@@ -206,52 +164,31 @@ class applicationPageState extends State<applicationPage> {
                           ),
                         ]
                     ),
-                    FutureBuilder<int?>(
-                      future: getUserId(),
-                      builder: (BuildContext context, AsyncSnapshot<int?> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          if (snapshot.hasData) {
-                            int? userId = snapshot.data;
-                            return Column(
-                              children: [
-                                if(data.user?.id != userId)...[
-                                  SizedBox(height: 8),
-                                  contractButton(
-                                    applicationId: data.id,
-                                    addContract: addContract,
-                                  ),
-
-                                ],
-                                if(data.user?.id == userId) ...[
-                                  SizedBox(height: 8),
-                                  Container(
-                                    child: Text(
-                                      'Ваша заявка!',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            );
-                          }
-                          else
-                          {
-                            return Text('Ошибка получения id');
-                          }
-                        }
-                        else
-                        {
-                          return CircularProgressIndicator();
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              onPrimary: Colors.white,
+                            ),
+                            child: Text('Удалить'),
+                            onPressed: () {
+                              deleteApplication(data?.id, context);
+    },
+    ),
+    ),
+    ],
+    ),
+    ],
+    ),
+    ),
+    );
+    },
+    ),
       ),
     );
   }
 }
+

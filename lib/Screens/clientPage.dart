@@ -5,6 +5,9 @@ import 'dart:convert';
 import 'package:clientflutter/Screens/applicationPage.dart';
 import 'package:clientflutter/Screens/lk.dart';
 
+import 'myApplication.dart';
+import 'myContract.dart';
+
 
 
 class clientPage extends StatelessWidget {
@@ -57,7 +60,7 @@ class _HomeState extends State<Home> {
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        selectedItemColor: Colors.deepPurple,
+        selectedItemColor: Colors.blue,
         onTap: onTabTapped,
         items: [
           BottomNavigationBarItem(
@@ -168,11 +171,31 @@ class PlaceholderWidget extends StatelessWidget {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => applicationPage(),
+                          builder: (context) => myApplication(),
                         ),
                       );
                     },
                     child: Text('Мои заявки'),
+                  ),
+                ],
+              ),
+              SizedBox(width:20),
+              Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      fixedSize: Size(405, 35),
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => myContract(),
+                        ),
+                      );
+                    },
+                    child: Text('Мои договоры'),
                   ),
                 ],
               ),

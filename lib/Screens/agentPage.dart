@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:clientflutter/Screens/applicationPage.dart';
 import 'package:clientflutter/Screens/lk.dart';
 
+import 'listContract.dart';
+
 
 
 class agentPage extends StatelessWidget {
@@ -55,21 +57,6 @@ class _HomeState extends State<Home> {
         ],
       ),
       body: _children[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: Colors.deepPurple,
-        onTap: onTabTapped,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.toc),
-            label: 'Главная',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.toc),
-            label: 'Договоры',
-          ),
-        ],
-      ),
     );
   }
 }
@@ -139,21 +126,6 @@ class PlaceholderWidget extends StatelessWidget {
             ),
             SizedBox(height: 16.0),
             if(index == 0) ...[
-              SingleChildScrollView(
-                child: Container(
-                  height: 278,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Image.network(
-                          'https://sun6-20.userapi.com/s/v1/ig2/GolcmJFBPjSoP15Fzw-7icbKxxReKYBAHsDsy4QjoV-Un11unj0S6XAvk7V1BfNTDlGgVt_62371foFKE6MG1JZy.jpg?size=957x957&quality=95&crop=42,0,957,957&ava=1',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
               SizedBox(width:20),
               Column(
                 children: [
@@ -172,54 +144,26 @@ class PlaceholderWidget extends StatelessWidget {
                     },
                     child: Text('Входящие заявки'),
                   ),
+                  SizedBox(width:20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      fixedSize: Size(405, 35),
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => listContract(),
+                        ),
+                      );
+                    },
+                    child: Text('Список договоров'),
+                  ),
                 ],
               ),
             ],
-            if(index == 1) ...[
-              SizedBox(height: 8.0),
-              TextField(
-                controller: applicationfullName,
-                decoration: InputDecoration(
-                  labelStyle: TextStyle(color: Colors.blue),
-                  labelText: 'ФИО клиента: ',
-                ),
-              ),
-              TextFormField(
-                controller: applicationNumberSeriesPassport,
-                maxLines: null,
-                decoration: InputDecoration(
-                  labelStyle: TextStyle(color: Colors.blue),
-                  labelText: 'Серия и номер паспорта (через пробел): ',
-                ),
-              ),
-              TextFormField(
-                controller: applicationInsuranceType,
-                maxLines: null,
-                decoration: InputDecoration(
-                  labelStyle: TextStyle(color: Colors.blue),
-                  labelText: 'Тип страхования: ',
-                ),
-              ),
-              TextFormField(
-                controller: applicationInsuranceSum,
-                maxLines: null,
-                decoration: InputDecoration(
-                  labelStyle: TextStyle(color: Colors.blue),
-                  labelText: 'Страховая сумма: ',
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
-                  minimumSize: Size(405, 35),
-                ),
-                onPressed: () {
-                  addContract(context);
-                },
-                child: Text('Сохранить'),
-              ),
             ],
-          ]
       ),
     );
   }

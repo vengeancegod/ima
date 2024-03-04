@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:clientflutter/Models/ApplicationModel.dart';
+import 'package:clientflutter/Models/ContractModel.dart';
 import 'package:clientflutter/Screens/clientPage.dart';
 import 'package:clientflutter/Screens/agentPage.dart';
 
@@ -14,95 +14,67 @@ import '../Models/User.dart';
 import 'agentPage.dart';
 
 
-class applicationPage extends StatefulWidget {
-  @override
-  applicationPageState createState() => applicationPageState();
-}
-class contractButton extends StatefulWidget {
-  final int applicationId;
-  final Function(int, BuildContext) addContract;
-
-  contractButton({required this.applicationId, required this.addContract});
+class listContract extends StatefulWidget {
 
   @override
-  _contractButtonState createState() => _contractButtonState();
+  listContractState createState() => listContractState();
 }
 
-class _contractButtonState extends State<contractButton> {
-  bool isContracted = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      icon: Icon(
-        isContracted ? Icons.done_all : Icons.done_all_outlined,
-        color: isContracted ? Colors.green: Colors.grey,
-      ),
-      label: Text('Оформить договор'),
-      onPressed: () {
-        setState(() {
-          isContracted = true;
-        });
-
-        widget.addContract(widget.applicationId, context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => contractPage(applicationId: widget.applicationId)),
-        );
-      },
-    );
-  }
-}
-class applicationPageState extends State<applicationPage> {
-  final url = Uri.parse('http://192.168.43.59:8092/applications/app');
+class listContractState extends State<listContract> {
   final headers = {'Content-Type': 'application/json'};
-  List<ApplicationModel> dataList = [];
+  List<ContractModel> dataList = [];
   User? user;
 
   Future<int?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('userId');
   }
-  Future<void> addApplication() async {
-    final response = await http.get(Uri.parse('http://192.168.43.59:8092/applications/appok'));
+  Future<void> getContracts() async {
+    final response = await http.get(Uri.parse('http://192.168.43.59:8092/contracts/get'));
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
       setState(() {
-        dataList = List<ApplicationModel>.from(jsonData.map((data) => ApplicationModel.fromJson(data)));
+        dataList = List<ContractModel>.from(jsonData.map((data) => ContractModel.fromJson(data)));
       });
     }
   }
+  Future<void> deleteContracts(int? contractId, BuildContext context) async {
 
-  Future<void> allApplication() async {
-    final response = await http.get(Uri.parse('http://192.168.43.59:8092/applications/app'));
+    final response = await http.delete(Uri.parse('http://192.168.43.59:8092/contracts/delete/$contractId'));
     if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      setState(() {
-        dataList = List<ApplicationModel>.from(jsonData.map((data) => ApplicationModel.fromJson(data)));
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.body),
+        ),
+      );
     }
-
-  }
-  Future<void> addContract(int? applicationId, BuildContext context) async {
+    getContracts();
   }
   @override
   void initState() {
     super.initState();
+    getContracts();
+  }
 
-    allApplication();
+  Future<void> myContracts() async {
+    int? userId = await getUserId();
+    final response = await http.get(Uri.parse('http://192.168.43.59:8092/contracts/myContracts/$userId'));
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      setState(() {
+        dataList = List<ContractModel>.from(jsonData.map((data) => ContractModel.fromJson(data)));
+      });
+    }
+
   }
-  _blockButton() async{
-    int? user = 0;
-    user = await getUserId();
-    return user;
-  }
+
   @override
   Widget build(BuildContext context){
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blue,
-          title: Text('Список заявок', style: TextStyle(color: Colors.white)),
+          title: Text('Список договоров', style: TextStyle(color: Colors.white)),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -142,13 +114,13 @@ class applicationPageState extends State<applicationPage> {
                     Row(
                         children: [
                           Text(
-                            'Серия и номер паспорта (через пробел): ',
+                            'Страховая премия: ',
                             style: TextStyle(
                               color: Colors.black,
                             ),
                           ),
                           Text(
-                            utf8.decode(data.numberSeriesPassport.toString().codeUnits),
+                            utf8.decode(data.insurancePremium.toString().codeUnits),
                             style: TextStyle(
                               color: Colors.black,
                             ),
@@ -176,13 +148,13 @@ class applicationPageState extends State<applicationPage> {
                     Row(
                         children: [
                           Text(
-                            'Страховая сумма: ',
+                            'Серия полиса: ',
                             style: TextStyle(
                               color: Colors.black,
                             ),
                           ),
                           Text(
-                            utf8.decode(data.insuranceSum.toString().codeUnits),
+                            utf8.decode(data.policySeries.toString().codeUnits),
                             style: TextStyle(
                               color: Colors.black,
                             ),
@@ -193,60 +165,55 @@ class applicationPageState extends State<applicationPage> {
                     Row(
                         children: [
                           Text(
-                            'Статус: ',
+                            'Номер полиса: ',
                             style: TextStyle(
                               color: Colors.black,
                             ),
                           ),
                           Text(
-                            utf8.decode(data.status.codeUnits),
+                            utf8.decode(data.policyNumber.toString().codeUnits),
                             style: TextStyle(
                               color: Colors.black,
                             ),
                           ),
                         ]
                     ),
-                    FutureBuilder<int?>(
-                      future: getUserId(),
-                      builder: (BuildContext context, AsyncSnapshot<int?> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          if (snapshot.hasData) {
-                            int? userId = snapshot.data;
-                            return Column(
-                              children: [
-                                if(data.user?.id != userId)...[
-                                  SizedBox(height: 8),
-                                  contractButton(
-                                    applicationId: data.id,
-                                    addContract: addContract,
-                                  ),
-
-                                ],
-                                if(data.user?.id == userId) ...[
-                                  SizedBox(height: 8),
-                                  Container(
-                                    child: Text(
-                                      'Ваша заявка!',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            );
-                          }
-                          else
-                          {
-                            return Text('Ошибка получения id');
-                          }
-                        }
-                        else
-                        {
-                          return CircularProgressIndicator();
-                        }
-                      },
+                    SizedBox(height: 5),
+                    Row(
+                        children: [
+                          Text(
+                            'Тип договора: ',
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          ),
+                          Text(
+                            utf8.decode(data.typeTreaty.toString().codeUnits),
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          ),
+                        ]
                     ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                    Expanded(
+                    child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      onPrimary: Colors.white,
+                    ),
+                    child: Text('Удалить'),
+                    onPressed: () {
+                     deleteContracts(data.id, context);
+                    },
+                    ),
+            ),
                   ],
                 ),
+                ],
+              ),
               ),
             );
           },
